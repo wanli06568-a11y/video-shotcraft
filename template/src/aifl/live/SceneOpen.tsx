@@ -1,17 +1,26 @@
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, Easing } from 'remotion';
+import { useVisualTheme, themePaint, themeAsset, sceneDefaults } from '../../themes/visual-theme';
+import { AbsoluteFill, Img, interpolate, useCurrentFrame, Easing } from 'remotion';
 import { AIFL_SHOTS } from '../Main';
 import { PageCam, CamKey } from './PageCam';
 import layout from '../live-layout.json';
 
-const SERIF = 'ui-serif, Georgia, "Times New Roman", serif';
-const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
-const INK = 'oklch(18% 0.006 82)';
-const AMBER = 'oklch(52% 0.115 65)';
-const INK2 = 'oklch(50% 0.006 82)';
-
-const WORDMARK = 'AI Foundation Lab';
-const KICKER = 'TEAM RESEARCH CONSOLE';
+/** Context-level defaults (copy / sizes / palette), editable per clip in the
+ * workbench. Motion timing below stays fixed. Hex = sRGB of the oklch tokens. */
+export const SCENE_OPEN_DEFAULTS = {
+  wordmark: 'AI Foundation Lab',
+  wordmarkSize: 132,
+  kicker: 'TEAM RESEARCH CONSOLE',
+  kickerSize: 26,
+  noteLine1: 'One card,',
+  noteLine2: 'one project.',
+  noteSize: 37,
+  ink: '#13110f',    // oklch(18% 0.006 82)
+  amber: '#955905',  // oklch(52% 0.115 65)
+  muted: '#65635f',  // oklch(50% 0.006 82)
+  paper: '#faf7f2',
+};
+type SceneOpenProps = Partial<typeof SCENE_OPEN_DEFAULTS>;
 
 const PAGE_H = layout.projects.pageH;
 
@@ -41,9 +50,6 @@ const PUSH_EASE = Easing.bezier(0.35, 0, 0.2, 1);
 
 const POP_EASE = Easing.bezier(0.2, 1.25, 0.3, 1); // spring with overshoot
 const RESEAT_EASE = Easing.bezier(0.4, 0, 0.3, 1.05); // compress on touchdown
-const PATCH = 'oklch(97.5% 0.008 82)';
-const SLOT_AMBER = 'oklch(58% 0.13 65)';
-const BEAM_CORE = 'rgba(255,248,232,0.98)';
 
 /** Brand open (0–83): an invisible pen draws an amber crosshair, "AI
  * Foundation Lab" letterpresses in glyph by glyph (all glyphs down by ~46), a mono kicker
@@ -57,7 +63,20 @@ const BEAM_CORE = 'rgba(255,248,232,0.98)';
  * the soft page texture; the card springs up off the plane and hovers ~54f
  * while a beam runs two laps around its rounded outline; then it settles flush
  * back into its slot (lock→touchdown ≈ 3.3s). */
-export const SceneOpen: React.FC = () => {
+export const SceneOpen: React.FC<SceneOpenProps> = (props) => {
+  const theme = useVisualTheme();
+  const paperStyle = theme.id === 'ink-press';
+  const paint = (css: string) => themePaint(theme, css);
+  const asset = (src: string) => themeAsset(theme, src);
+  const SERIF = (paperStyle ? 'ui-serif, Georgia, "Times New Roman", serif' : theme.font);
+  const MONO = (paperStyle ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : theme.font);
+  const PATCH = paint('oklch(97.5% 0.008 82)');
+  const SLOT_AMBER = paint('oklch(58% 0.13 65)');
+  const BEAM_CORE = paint('rgba(255,248,232,0.98)');
+  const {
+    wordmark: WORDMARK, wordmarkSize, kicker: KICKER, kickerSize, noteLine1, noteLine2, noteSize,
+    ink: INK, amber: AMBER, muted: INK2, paper,
+  } = { ...sceneDefaults(theme, 'morning', SCENE_OPEN_DEFAULTS), ...props };
   const frame = useCurrentFrame();
   const duration = AIFL_SHOTS.morning.duration; // 220
 
@@ -122,7 +141,7 @@ export const SceneOpen: React.FC = () => {
   const poolRx = poolBase * (1 + poolPulse);
   const poolRy = poolBase * 0.8 * (1 + poolPulse);
   // outside-pool dim deepens as the light locks and the camera pushes in.
-  const vignette = interpolate(frame, [104, 114, 130], [0.16, 0.34, 0.42], {
+  const vignette = interpolate(frame, [104, 114, 130], paperStyle ? [0.16, 0.34, 0.42] : [0.04, 0.07, 0.09], {
     extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
   });
 
@@ -153,7 +172,7 @@ export const SceneOpen: React.FC = () => {
   });
 
   // two-layer shadow that grows with altitude
-  const shadow = `0 ${8 * lift}px ${10 + 12 * lift}px rgba(40,30,20,${0.18 * lift}), 0 ${46 * lift}px ${90 * lift}px rgba(40,30,20,${0.22 * lift})`;
+  const shadow = paint(`0 ${8 * lift}px ${10 + 12 * lift}px rgba(40,30,20,${0.18 * lift}), 0 ${46 * lift}px ${90 * lift}px rgba(40,30,20,${0.22 * lift})`);
 
   // vacated-slot amber outline: alive while airborne, brightens as the card
   // lands, then vanishes.
@@ -195,7 +214,7 @@ export const SceneOpen: React.FC = () => {
   const rootOpacity = 1 - outT;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#faf7f2', opacity: rootOpacity }}>
+    <AbsoluteFill style={{ backgroundColor: paper, opacity: rootOpacity }}>
       {frame >= 84 ? (
         <AbsoluteFill style={{ opacity: macroIn }}>
           <PageCam
@@ -209,7 +228,7 @@ export const SceneOpen: React.FC = () => {
             <div
               style={{
                 position: 'absolute', left: 0, right: 0, bottom: 0, height: 8,
-                background: 'rgba(255,255,255,0.85)', filter: 'blur(6px)',
+                background: paint('rgba(255,255,255,0.85)'), filter: 'blur(6px)',
                 opacity: 0.6 * Math.min(1, lift + Math.max(0, (frame - 114) / 16)),
                 pointerEvents: 'none',
               }}
@@ -224,7 +243,7 @@ export const SceneOpen: React.FC = () => {
                     position: 'absolute', left: CARD.x - 2, top: CARD.y - 2,
                     width: CARD.w + 4, height: CARD.h + 4, background: PATCH,
                     borderRadius: RADIUS,
-                    boxShadow: `inset 0 0 26px rgba(180,120,50,${0.12 * slotEdge})`,
+                    boxShadow: paint(`inset 0 0 26px rgba(180,120,50,${0.12 * slotEdge})`),
                     opacity: slotVis,
                   }}
                 >
@@ -257,7 +276,7 @@ export const SceneOpen: React.FC = () => {
                   }}
                 >
                   <Img
-                    src={staticFile(`textures/live/${CARD.file}`)}
+                    src={asset(`textures/live/${CARD.file}`)}
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
                   />
                   {/* 4x hi-res capture layered on top, laid out at plain CARD
@@ -267,7 +286,7 @@ export const SceneOpen: React.FC = () => {
                       px) and samples DOWN from the 1432px source — crisp — rather
                       than being downsampled to layout size and GPU-upscaled. */}
                   <Img
-                    src={staticFile('textures/live/card4-hires.png')}
+                    src={asset('textures/live/card4-hires.png')}
                     style={{
                       position: 'absolute',
                       inset: 0,
@@ -281,7 +300,7 @@ export const SceneOpen: React.FC = () => {
                   <div
                     style={{
                       position: 'absolute', inset: 0,
-                      background: 'linear-gradient(160deg, rgba(255,255,255,0.5), transparent 40%)',
+                      background: paint('linear-gradient(160deg, rgba(255,255,255,0.5), transparent 40%)'),
                       opacity: lift, pointerEvents: 'none',
                     }}
                   />
@@ -290,7 +309,7 @@ export const SceneOpen: React.FC = () => {
                 <div
                   style={{
                     position: 'absolute', inset: 0, borderRadius: RADIUS,
-                    boxShadow: `inset 0 0 0 1px rgba(255,255,255,${0.7 * lift})`,
+                    boxShadow: paint(`inset 0 0 0 1px rgba(255,255,255,${0.7 * lift})`),
                     pointerEvents: 'none',
                   }}
                 />
@@ -306,7 +325,7 @@ export const SceneOpen: React.FC = () => {
                       position: 'absolute', left: -3, top: -3, overflow: 'visible',
                       pointerEvents: 'none',
                       opacity: beam1On ? 1 : 0.62,
-                      filter: `drop-shadow(0 0 6px ${AMBER}) drop-shadow(0 0 18px rgba(255,240,210,0.55))`,
+                      filter: paint(`drop-shadow(0 0 6px ${AMBER}) drop-shadow(0 0 18px rgba(255,240,210,0.55))`),
                     }}
                   >
                     {/* amber edge (wider) */}
@@ -360,7 +379,7 @@ export const SceneOpen: React.FC = () => {
                     style={{
                       position: 'absolute', left: 566, top: 736, width: 210, height: 74,
                       transform: 'translateZ(2px)',
-                      background: 'radial-gradient(ellipse at 50% 50%, rgba(40,30,20,0.3), transparent 70%)',
+                      background: paint('radial-gradient(ellipse at 50% 50%, rgba(40,30,20,0.3), transparent 70%)'),
                       filter: 'blur(12px)',
                       opacity: 0.55 * noteVis,
                     }}
@@ -368,6 +387,7 @@ export const SceneOpen: React.FC = () => {
                   <div
                     style={{
                       position: 'absolute', left: 556, top: 668, width: 230,
+                      ...(!paperStyle ? {background: theme.page, boxShadow: `0 0 0 14px ${theme.page}`, borderRadius: 7} : {}),
                       transform: `translateZ(${noteZ}px) translateY(${(1 - noteIn) * 26}px)`,
                       opacity: noteVis,
                       filter: `blur(${(1 - noteIn) * 4}px)`,
@@ -375,11 +395,11 @@ export const SceneOpen: React.FC = () => {
                   >
                     <div
                       style={{
-                        fontFamily: SERIF, fontSize: 37, fontWeight: 600, color: INK,
+                        fontFamily: SERIF, fontSize: noteSize, fontWeight: 600, color: INK,
                         lineHeight: 1.16, letterSpacing: '-0.012em',
                       }}
                     >
-                      One card,
+                      {noteLine1}
                     </div>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                       {/* marker highlight sweeping in behind the words */}
@@ -387,18 +407,18 @@ export const SceneOpen: React.FC = () => {
                         style={{
                           position: 'absolute', left: -5, top: '12%', bottom: '4%',
                           width: `calc(${hl} * (100% + 10px))`,
-                          background: 'oklch(88% 0.095 85)',
+                          background: paint('oklch(88% 0.095 85)'),
                           borderRadius: 4,
                         }}
                       />
                       <div
                         style={{
                           position: 'relative',
-                          fontFamily: SERIF, fontStyle: 'italic', fontSize: 37, fontWeight: 600,
+                          fontFamily: SERIF, fontStyle: paperStyle ? 'italic' : 'normal', fontSize: noteSize, fontWeight: 600,
                           color: INK, lineHeight: 1.16, letterSpacing: '-0.012em',
                         }}
                       >
-                        one project.
+                        {noteLine2}
                       </div>
                     </div>
                   </div>
@@ -410,17 +430,17 @@ export const SceneOpen: React.FC = () => {
           {/* roving / locking spotlight: warm pool + dim outside so it reads */}
           <AbsoluteFill
             style={{
-              background: `radial-gradient(${poolRx}px ${poolRy}px at ${spotX}% ${spotY}%, rgba(255,241,214,0.42), rgba(255,241,214,0.10) 45%, rgba(70,56,38,${vignette * spotOn}) 100%)`,
+              background: paint(`radial-gradient(${poolRx}px ${poolRy}px at ${spotX}% ${spotY}%, rgba(255,241,214,0.42), rgba(255,241,214,0.10) 45%, rgba(70,56,38,${vignette * spotOn}) 100%)`),
               pointerEvents: 'none',
-              opacity: spotOn,
+              opacity: paperStyle ? spotOn : spotOn * 0.18,
             }}
           />
           {/* faint trailing bounce of the same light */}
           <AbsoluteFill
             style={{
-              background: `radial-gradient(300px 220px at ${spotX - 6}% ${spotY + 10}%, rgba(255,246,228,0.18), transparent 70%)`,
+              background: paint(`radial-gradient(300px 220px at ${spotX - 6}% ${spotY + 10}%, rgba(255,246,228,0.18), transparent 70%)`),
               pointerEvents: 'none',
-              opacity: spotOn * 0.7,
+              opacity: paperStyle ? spotOn * 0.7 : 0,
             }}
           />
         </AbsoluteFill>
@@ -458,13 +478,13 @@ export const SceneOpen: React.FC = () => {
             {/* wordmark: glyph-by-glyph letterpress with amber under-glint */}
             <div
               style={{
-                fontFamily: SERIF, fontSize: 132, fontWeight: 600, color: INK,
+                fontFamily: SERIF, fontSize: wordmarkSize, fontWeight: 600, color: INK,
                 letterSpacing: '-0.01em', lineHeight: 1, whiteSpace: 'pre',
                 display: 'inline-flex', alignItems: 'flex-end',
               }}
             >
               {WORDMARK.split('').map((ch, i) => {
-                const delay = 10 + i * 3;
+                const delay = 10 + i * 1.5;
                 const t = interpolate(frame, [delay, delay + 12], [0, 1], {
                   extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
                   easing: Easing.bezier(0.2, 0.7, 0.25, 1),
@@ -507,7 +527,7 @@ export const SceneOpen: React.FC = () => {
             {/* mono kicker typewriter + amber block cursor */}
             <div
               style={{
-                fontFamily: MONO, fontSize: 26, letterSpacing: '0.14em', color: INK2,
+                fontFamily: MONO, fontSize: kickerSize, letterSpacing: '0.14em', color: INK2,
                 marginTop: 30, textTransform: 'uppercase', height: 30,
                 display: 'flex', justifyContent: 'center', alignItems: 'center',
               }}

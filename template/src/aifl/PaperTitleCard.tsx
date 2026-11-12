@@ -1,8 +1,18 @@
+import { useVisualTheme, themePaint, sceneDefaults } from '../themes/visual-theme';
 import { AbsoluteFill, interpolate, useCurrentFrame, Easing } from 'remotion';
 import { DigitRoll } from './DigitRoll';
 
-const SERIF = 'ui-serif, Georgia, "Times New Roman", serif';
-const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+
+/** Context-level defaults (copy size / palette). Exposed as props so the
+ * workbench can edit them per clip; the motion timing stays fixed. Hex values
+ * are the sRGB renderings of the original oklch tokens. */
+export const TITLE_CARD_DEFAULTS = {
+  fontSize: 116,
+  ink: '#13110f',    // oklch(18% 0.006 82)
+  accent: '#955905', // oklch(52% 0.115 65)
+  muted: '#65635f',  // oklch(50% 0.006 82)
+  paper: '#f9f6f1',  // oklch(97.5% 0.008 82)
+};
 
 /**
  * Paper title card: warm paper field, serif statement letterpressed word by
@@ -13,7 +23,19 @@ export const PaperTitleCard: React.FC<{
   words: { text: string; accent?: boolean }[];
   sub?: string;
   subDigits?: string;
-}> = ({ duration, words, sub, subDigits }) => {
+  fontSize?: number;
+  ink?: string;
+  accent?: string;
+  muted?: string;
+  paper?: string;
+}> = (props) => {
+  const theme = useVisualTheme();
+  const paperStyle = theme.id === 'ink-press';
+  const paint = (css: string) => themePaint(theme, css);
+  const SERIF = paperStyle ? 'ui-serif, Georgia, "Times New Roman", serif' : theme.font;
+  const MONO = (paperStyle ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : theme.font);
+  const {duration, words, sub, subDigits, ...style} = props;
+  const {fontSize, ink, accent, muted, paper} = {...sceneDefaults(theme, 'title-card', TITLE_CARD_DEFAULTS), ...style};
   const frame = useCurrentFrame();
   const fadeOut = interpolate(frame, [duration - 8, duration], [1, 0], {
     extrapolateLeft: 'clamp',
@@ -32,18 +54,18 @@ export const PaperTitleCard: React.FC<{
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: 'oklch(97.5% 0.008 82)',
+        backgroundColor: paper,
         justifyContent: 'center',
         alignItems: 'center',
         opacity: fadeOut,
-        backgroundImage: 'radial-gradient(1100px 750px at 50% 42%, oklch(99.3% 0.014 88 / 0.85), transparent 65%)',
+        backgroundImage: paint('radial-gradient(1100px 750px at 50% 42%, oklch(99.3% 0.014 88 / 0.85), transparent 65%)'),
       }}
     >
       <div style={{ textAlign: 'center', maxWidth: 1500 }}>
         <div
           style={{
-            fontFamily: SERIF, fontSize: 116, fontWeight: 600, lineHeight: 1.14,
-            color: 'oklch(18% 0.006 82)', letterSpacing: '-0.012em',
+            fontFamily: SERIF, fontSize, fontWeight: 600, lineHeight: 1.14,
+            color: ink, letterSpacing: '-0.012em',
             display: 'flex', flexWrap: 'wrap', justifyContent: 'center', columnGap: '0.26em',
           }}
         >
@@ -62,8 +84,8 @@ export const PaperTitleCard: React.FC<{
                   transform: `scale(${1.28 - 0.28 * t})`,
                   filter: `blur(${(1 - t) * 7}px)`,
                   display: 'inline-block',
-                  fontStyle: w.accent ? 'italic' : 'normal',
-                  color: w.accent ? 'oklch(52% 0.115 65)' : undefined,
+                  fontStyle: paperStyle && w.accent ? 'italic' : 'normal',
+                  color: w.accent ? accent : undefined,
                 }}
               >
                 {w.text}
@@ -74,12 +96,12 @@ export const PaperTitleCard: React.FC<{
         <div
           style={{
             height: 6, width: 220, margin: '38px auto 0', borderRadius: 3,
-            background: 'oklch(52% 0.115 65)', transform: `scaleX(${underline})`,
+            background: accent, transform: `scaleX(${underline})`,
           }}
         />
         {sub ? (
-          <div style={{ fontFamily: MONO, fontSize: 26, letterSpacing: '0.12em', color: 'oklch(50% 0.006 82)', marginTop: 34, opacity: subT, textTransform: 'uppercase', display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5em' }}>
-            {subDigits ? <DigitRoll value={subDigits} delay={12} fontSize={26} /> : null}
+          <div style={{ fontFamily: MONO, fontSize: paperStyle ? 26 : 44, letterSpacing: '0.12em', color: muted, marginTop: 34, opacity: subT, textTransform: 'uppercase', display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '0.5em' }}>
+            {subDigits ? <DigitRoll value={subDigits} delay={12} fontSize={paperStyle ? 26 : 44} color={accent} /> : null}
             <span>{sub}</span>
           </div>
         ) : null}

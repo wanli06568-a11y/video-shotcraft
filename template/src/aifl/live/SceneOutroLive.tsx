@@ -1,11 +1,20 @@
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, Easing } from 'remotion';
+import { useVisualTheme, themePaint, themeAsset, sceneDefaults } from '../../themes/visual-theme';
+import { AbsoluteFill, Img, interpolate, useCurrentFrame, Easing } from 'remotion';
 import { PageCam, CamKey } from './PageCam';
 import { AIFL_SHOTS } from '../Main';
 import layout from '../live-layout.json';
 
-const SERIF = 'ui-serif, Georgia, "Times New Roman", serif';
-const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-const LETTERS = 'AI Foundation Lab'.split('');
+/** Context-level defaults (copy / sizes / palette), editable per clip in the workbench. */
+export const SCENE_OUTRO_DEFAULTS = {
+  wordmark: 'AI Foundation Lab',
+  wordmarkSize: 148,
+  tagline: 'Team Research Console',
+  taglineSize: 25,
+  ink: '#13110f',    // oklch(18% 0.006 82)
+  amber: '#955905',  // oklch(52% 0.115 65)
+  muted: '#65635f',  // oklch(50% 0.006 82)
+};
+type SceneOutroProps = Partial<typeof SCENE_OUTRO_DEFAULTS>;
 const PAGE_H = layout.projects.pageH;
 const WBR_PAGE_H = layout.wbr.pageH;
 
@@ -63,7 +72,15 @@ const DUST = Array.from({ length: 20 }, (_, i) => ({
  * Launch-event treatment: a crane-in camera on the whole photo layer, ghost
  * trails + landing glows on the fly-ins, a stage light behind the wordmark,
  * gold dust and a single opening light sweep for atmosphere. */
-export const SceneOutroLive: React.FC = () => {
+export const SceneOutroLive: React.FC<SceneOutroProps> = (props) => {
+  const theme = useVisualTheme();
+  const paperStyle = theme.id === 'ink-press';
+  const paint = (css: string) => themePaint(theme, css);
+  const asset = (src: string) => themeAsset(theme, src);
+  const SERIF = (paperStyle ? 'ui-serif, Georgia, "Times New Roman", serif' : theme.font);
+  const MONO = (paperStyle ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : theme.font);
+  const { wordmark, wordmarkSize, tagline, taglineSize, ink, amber, muted } = { ...sceneDefaults(theme, 'outro', SCENE_OUTRO_DEFAULTS), ...props };
+  const LETTERS = wordmark.split('');
   const frame = useCurrentFrame();
   const duration = AIFL_SHOTS.outro.duration; // 115
 
@@ -77,7 +94,7 @@ export const SceneOutroLive: React.FC = () => {
     extrapolateRight: 'clamp',
     easing: Easing.bezier(0.3, 0, 0.2, 1),
   });
-  const tag = interpolate(frame, [68, 80], [0, 1], {
+  const tag = interpolate(frame, paperStyle ? [68, 80] : [62, 72], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
@@ -160,7 +177,7 @@ export const SceneOutroLive: React.FC = () => {
       >
         <PageCam src="textures/live/projects-full.png" pageH={PAGE_H} keys={CAM} blur={blur} saturate={0.9} />
         {/* warm scrim under the flying elements: keeps the center legible without washing them */}
-        <AbsoluteFill style={{ background: 'radial-gradient(1200px 800px at 50% 48%, rgba(250,247,242,0.82), rgba(250,247,242,0.55) 60%, rgba(250,247,242,0.35))', pointerEvents: 'none' }} />
+        <AbsoluteFill style={{ background: paint('radial-gradient(1200px 800px at 50% 48%, rgba(250,247,242,0.82), rgba(250,247,242,0.55) 60%, rgba(250,247,242,0.35))'), pointerEvents: 'none' }} />
 
         {/* group photo: elements fly in from all sides and settle around the wordmark */}
         <AbsoluteFill style={{ pointerEvents: 'none' }}>
@@ -186,16 +203,16 @@ export const SceneOutroLive: React.FC = () => {
             const air = Math.max(0, 1 - t);
             const shadow =
               air > 0.01
-                ? `0 ${10 + 26 * air}px ${24 + 46 * air}px rgba(30,25,18,${0.16 + 0.1 * air}), 0 2px 6px rgba(30,25,18,.08)`
-                : '0 10px 24px rgba(30,25,18,.16), 0 2px 6px rgba(30,25,18,.08)';
+                ? paint(`0 ${10 + 26 * air}px ${24 + 46 * air}px rgba(30,25,18,${0.16 + 0.1 * air}), 0 2px 6px rgba(30,25,18,.08)`)
+                : paint('0 10px 24px rgba(30,25,18,.16), 0 2px 6px rgba(30,25,18,.08)');
 
             const settledOpacity = opacity * (1 - 0.12 * recede);
             const saturate = 1 - 0.08 * recede;
 
             const texture = el.wbrCrop
               ? {
-                  background: `#fff url(${staticFile(`textures/live/${el.file}`)}) -576px -173px / 1920px ${WBR_PAGE_H}px no-repeat`,
-                  border: '1px solid oklch(90% .008 82)',
+                  background: paint(`#fff url(${asset(`textures/live/${el.file}`)}) -576px -173px / 1920px ${WBR_PAGE_H}px no-repeat`),
+                  border: paint('1px solid oklch(90% .008 82)'),
                 }
               : null;
 
@@ -235,7 +252,7 @@ export const SceneOutroLive: React.FC = () => {
                   >
                     {el.wbrCrop ? null : (
                       <Img
-                        src={staticFile(`textures/live/${el.file}`)}
+                        src={asset(`textures/live/${el.file}`)}
                         style={{ position: 'absolute', inset: 0, width: el.w, height: el.h, display: 'block' }}
                       />
                     )}
@@ -260,12 +277,12 @@ export const SceneOutroLive: React.FC = () => {
                 >
                   {el.wbrCrop ? null : (
                     <Img
-                      src={staticFile(`textures/live/${el.file}`)}
+                      src={asset(`textures/live/${el.file}`)}
                       style={{ position: 'absolute', inset: 0, width: el.w, height: el.h, display: 'block' }}
                     />
                   )}
                 </div>
-                {showGlow ? (
+                {paperStyle && showGlow ? (
                   <div
                     style={{
                       position: 'absolute',
@@ -274,7 +291,7 @@ export const SceneOutroLive: React.FC = () => {
                       width: glowR * 2,
                       height: glowR * 2,
                       borderRadius: '50%',
-                      background: 'radial-gradient(circle, oklch(78% 0.13 70 / 0.9), oklch(78% 0.13 70 / 0) 70%)',
+                      background: paint('radial-gradient(circle, oklch(78% 0.13 70 / 0.9), oklch(78% 0.13 70 / 0) 70%)'),
                       opacity: glow,
                       mixBlendMode: 'multiply',
                     }}
@@ -288,7 +305,7 @@ export const SceneOutroLive: React.FC = () => {
 
       {/* ---- atmosphere: gold dust drifting up in front of the group photo ---- */}
       <AbsoluteFill style={{ pointerEvents: 'none' }}>
-        {DUST.map((d, i) => {
+        {paperStyle && DUST.map((d, i) => {
           const y = (((d.y0 - frame * d.rise) % 1080) + 1080) % 1080;
           const x = d.x + Math.sin(frame * d.swayFreq + d.phase) * d.swayAmp;
           return (
@@ -301,7 +318,7 @@ export const SceneOutroLive: React.FC = () => {
                 width: d.size,
                 height: d.size,
                 borderRadius: '50%',
-                background: 'oklch(75% 0.08 85)',
+                background: paint('oklch(75% 0.08 85)'),
                 opacity: d.opacity,
               }}
             />
@@ -319,8 +336,8 @@ export const SceneOutroLive: React.FC = () => {
               bottom: 0,
               left: sweepX - 300,
               width: 600,
-              background: 'linear-gradient(90deg, rgba(255,244,224,0), rgba(255,244,224,1) 50%, rgba(255,244,224,0))',
-              opacity: sweepOpacity,
+              background: paint('linear-gradient(90deg, rgba(255,244,224,0), rgba(255,244,224,1) 50%, rgba(255,244,224,0))'),
+              opacity: paperStyle ? sweepOpacity : 0,
             }}
           />
         </AbsoluteFill>
@@ -331,8 +348,8 @@ export const SceneOutroLive: React.FC = () => {
         <AbsoluteFill
           style={{
             pointerEvents: 'none',
-            background: 'radial-gradient(700px 360px at 960px 470px, rgba(255,246,228,0.95), rgba(255,246,228,0.35) 55%, rgba(255,246,228,0) 75%)',
-            opacity: stageLight,
+            background: paint('radial-gradient(700px 360px at 960px 470px, rgba(255,246,228,0.95), rgba(255,246,228,0.35) 55%, rgba(255,246,228,0) 75%)'),
+            opacity: paperStyle ? stageLight : 0,
           }}
         />
       ) : null}
@@ -342,7 +359,7 @@ export const SceneOutroLive: React.FC = () => {
         <AbsoluteFill
           style={{
             pointerEvents: 'none',
-            background: 'radial-gradient(1400px 900px at 50% 50%, rgba(62,48,32,0) 55%, rgba(62,48,32,0.7) 100%)',
+            background: paint('radial-gradient(1400px 900px at 50% 50%, rgba(62,48,32,0) 55%, rgba(62,48,32,0.7) 100%)'),
             opacity: vignette,
           }}
         />
@@ -350,9 +367,9 @@ export const SceneOutroLive: React.FC = () => {
 
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', pointerEvents: 'none' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: SERIF, fontSize: 148, fontWeight: 600, color: 'oklch(18% 0.006 82)', letterSpacing: `${wordSpacing}em`, display: 'flex' }}>
+          <div style={{ fontFamily: SERIF, fontSize: wordmarkSize, fontWeight: 600, color: ink, letterSpacing: `${wordSpacing}em`, display: 'flex' }}>
             {LETTERS.map((ch, i) => {
-              const delay = Math.round(42 + i * 1.8);
+              const delay = Math.round(42 + i * (paperStyle ? 1.8 : 1.3));
               const t = interpolate(frame, [delay, delay + 8], [0, 1], {
                 extrapolateLeft: 'clamp',
                 extrapolateRight: 'clamp',
@@ -375,17 +392,17 @@ export const SceneOutroLive: React.FC = () => {
             })}
           </div>
           <div style={{ position: 'relative', height: 6, width: 260, margin: '34px auto 0' }}>
-            <div style={{ position: 'absolute', inset: 0, borderRadius: 3, background: 'oklch(52% 0.115 65)', transform: `scaleX(${rule})` }} />
+            <div style={{ position: 'absolute', inset: 0, borderRadius: 3, background: amber, transform: `scaleX(${rule})` }} />
             {/* launch lower-third: 1px amber lines shooting out from the rule ends, then fading */}
             {ruleExt > 0 && ruleExtFade > 0 ? (
               <>
-                <div style={{ position: 'absolute', top: 2.5, height: 1, right: '100%', width: 190 * ruleExt, background: 'oklch(52% 0.115 65)', opacity: ruleExtFade }} />
-                <div style={{ position: 'absolute', top: 2.5, height: 1, left: '100%', width: 190 * ruleExt, background: 'oklch(52% 0.115 65)', opacity: ruleExtFade }} />
+                <div style={{ position: 'absolute', top: 2.5, height: 1, right: '100%', width: 190 * ruleExt, background: amber, opacity: ruleExtFade }} />
+                <div style={{ position: 'absolute', top: 2.5, height: 1, left: '100%', width: 190 * ruleExt, background: amber, opacity: ruleExtFade }} />
               </>
             ) : null}
           </div>
-          <div style={{ fontFamily: MONO, fontSize: 25, letterSpacing: '0.14em', color: 'oklch(50% 0.006 82)', marginTop: 30, opacity: tag, textTransform: 'uppercase' }}>
-            Team Research Console
+          <div style={{ fontFamily: MONO, fontSize: taglineSize, letterSpacing: '0.14em', color: muted, marginTop: 30, opacity: tag, textTransform: 'uppercase' }}>
+            {tagline}
           </div>
         </div>
       </AbsoluteFill>

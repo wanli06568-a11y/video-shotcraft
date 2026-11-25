@@ -1,5 +1,32 @@
 # Sponsor materials
 
+## APINEBULA
+
+`apinebula.png` is the unmodified white-background sponsor image supplied by
+the project maintainer on 2026-11-17. The Simplified Chinese description is
+based on the supplied document `文字素材与链接11.17.docx`; the English,
+Traditional Chinese, Japanese and Russian descriptions are translations.
+
+All README registration links use the explicit referral URL listed at the
+end of the supplied document: [APINEBULA](https://apinebula.ai/ref/HLROcb4p).
+The older hyperlink embedded in the prose is not used. The model-pricing
+claim of `0.6 折` means 6% of the regular price; the separate `video` top-up
+promo code offers 10% off, as stated in the supplied copy.
+
+Brand marks belong to their respective rights holders and are not covered
+by this repository's Apache-2.0 license.
+
+## OpenLux
+
+`openlux.png` uses the symbol-only logo supplied by the project maintainer,
+with transparent padding below the symbol for README spacing.
+The English description uses the supplied sponsor copy, with translations
+in the Simplified Chinese, Traditional Chinese, Japanese, and Russian READMEs.
+All registration links use the supplied [OpenLux referral URL](https://www.openlux.ai/register?channel=c_n68puogw).
+
+The OpenLux logo and trademark are not covered by this repository's
+Apache-2.0 license.
+
 ## APIMart
 
 `apimart.png` is the sponsor image supplied by the project maintainer on

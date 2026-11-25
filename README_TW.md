@@ -10,7 +10,7 @@
 
 [English](README.md) | [简体中文](README_CN.md) | **繁體中文** | [日本語](README_JA.md) | [Русский](README_RU.md)
 
-[![Gallery](https://img.shields.io/badge/Gallery-live%20previews-d3923c)](https://vincentwei1021.github.io/video-shotcraft/)
+[![Gallery](https://img.shields.io/badge/Gallery-live%20previews-d3923c)](https://vincentwei1021.github.io/video-shotcraft/) <a href="#wechat-community"><img src="https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1%E7%BE%A4-07C160?style=flat&amp;logo=wechat&amp;logoColor=white" alt="微信群" height="20"></a>
 [![Showcase](https://img.shields.io/badge/Showcase-community%20videos-7c3aed)](https://vincentwei1021.github.io/video-shotcraft/showcase.html)
 
 [![GitHub stars](https://img.shields.io/github/stars/Vincentwei1021/video-shotcraft)](https://github.com/Vincentwei1021/video-shotcraft/stargazers)
@@ -57,11 +57,23 @@
 <table>
 <tr>
 <td align="center" valign="middle" width="25%">
-  <a href="https://go.apimart.ai/tw-video-shotcraft"><img src="./assets/readme/sponsors/apimart.png" width="200" alt="APIMart 標誌"></a><br>
-  <a href="https://go.apimart.ai/tw-video-shotcraft"><b>APIMart</b></a>
+  <a href="https://apinebula.ai/ref/HLROcb4p"><img src="./assets/readme/sponsors/apinebula.png" width="200" alt="APINEBULA 標誌"></a><br>
+  <a href="https://apinebula.ai/ref/HLROcb4p"><b>APINEBULA</b></a>
 </td>
 <td>
-  <p>感謝 APIMart 贊助了本專案！APIMart 是專注 AI 圖片/影片生成的低價 API 平臺，GPT-Image-2 低至 $0.006/張，1 美元可出圖 160+ 張。圖片、影片一套非同步 API 通吃，提交任務拿 ID、回撥取結果，跑批萬張不超時、換模型不改程式碼。按量付費、無月費，通過此<a href="https://go.apimart.ai/tw-video-shotcraft">註冊連結</a>註冊即可開用。</p>
+  <p>感謝 APINEBULA 贊助本專案！APINEBULA 是銀河錄像局旗下的企業級 AI 聚合平臺，背靠大平臺資源，為開發者、團隊與企業使用者提供穩定、高性價比的大型語言模型 API 串接服務。平臺聚合 Claude、GPT、Gemini 等主流完整能力模型，透過單一介面串接全球頂尖 AI 大模型，各大模型價格低至 0.6 折起，支援企業級高併發、正式合約、公司帳戶匯款與發票服務！</p>
+  <p>透過<a href="https://apinebula.ai/ref/HLROcb4p">此連結</a>註冊，並在儲值時輸入 <b>video</b> 優惠碼，即可享<b>九折優惠</b>！</p>
+</td>
+</tr>
+<tr>
+<td align="center" valign="middle" width="25%">
+  <a href="https://www.openlux.ai/register?channel=c_n68puogw"><img src="./assets/readme/sponsors/openlux.png" width="168" alt="OpenLux 標誌"></a><br>
+  <a href="https://www.openlux.ai/register?channel=c_n68puogw"><b>OpenLux</b></a>
+</td>
+<td>
+  <p>感謝 OpenLux 贊助本專案！OpenLux 是面向企業的一站式 AI 平臺，匯集全球主要供應商的領先 AI 模型，提供快速、穩定的服務與即時的技術支援。Claude、OpenAI 和 Gemini 模型的基本價格分別低至官方定價的 8.82%、4% 和 8%。</p>
+  <p>video-shotcraft 使用者專屬優惠：透過我們的推薦連結註冊，儲值最高可享 7.5% 折扣！</p>
+  <p><a href="https://www.openlux.ai/register?channel=c_n68puogw">立即註冊 OpenLux →</a></p>
 </td>
 </tr>
 <tr>
@@ -287,3 +299,15 @@ Video Shotcraft 的搜尋與下載 CLI 為獨立實現。
     <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Vincentwei1021/video-shotcraft&type=date&legend=top-left&sealed_token=DQ8_yn0k8in6tP80CRd9Ghuk1fcdEW7poFh9ticGB3wMNO-E_i6g51sUiQWCAQYP0u0bjRweuIfGoRS8FnrIz86oFp1lcl5zu2vrEJrQOoNvwdUSwmm8XNPkAiln1o-EBAX0uU8k6ReIlSRufGLqpoxsWshMSZ9mmok6ox5XXIUO77b7zOgp2yRIH6yR" />
   </picture>
 </a>
+
+<a id="wechat-community"></a>
+
+## 💬 微信群
+
+歡迎加入「Vincent 的 AI 交流群 5」，一起交流 AI 應用、程式開發和影片創作。
+
+<a href="assets/wechat-group.png?v=5"><img src="assets/wechat-group.png?v=5" alt="Vincent 的 AI 交流群 5 微信入群 QR code" width="400"></a>
+
+用微信掃碼加入。使用手機瀏覽時，可先儲存圖片，再在微信「掃一掃」中從相簿選取。
+
+此 QR code 在 **2026-12-02 前**有效，以微信提示為準。若已失效，可[透過 X 聯絡 Vincent](https://x.com/VincentWei93)取得最新入群方式。
